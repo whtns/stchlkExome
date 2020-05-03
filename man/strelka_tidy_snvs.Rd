@@ -9,6 +9,9 @@ strelka_tidy_snvs(my_vcf)
 \arguments{
 \item{my_vcf}{}
 }
+\value{
+
+}
 \description{
 Tidy Strelka snvs
 }

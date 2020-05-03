@@ -9,6 +9,9 @@ split_m2_somatic_vars(m2_somatic_vars, m2_filt_variant_paths = NULL)
 \arguments{
 \item{m2_filt_variant_paths}{}
 }
+\value{
+
+}
 \description{
 split mutect2 variant list into sample type dataframe list
 }

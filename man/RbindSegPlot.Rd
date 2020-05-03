@@ -9,6 +9,9 @@ RbindSegPlot(SCNA_obj_list, sample_type = NULL, ...)
 \arguments{
 \item{...}{}
 }
+\value{
+
+}
 \description{
 Bind Segmentation Plots
 }

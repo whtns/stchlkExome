@@ -9,6 +9,9 @@ seg_span_gene(baf_segment, chr, feature_start, feature_end)
 \arguments{
 \item{feature_end}{}
 }
+\value{
+
+}
 \description{
 Title
 }

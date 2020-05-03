@@ -9,6 +9,9 @@ filt_vcf_by_gold(vcf, gold_vars)
 \arguments{
 \item{gold_vars}{}
 }
+\value{
+
+}
 \description{
 Filter VCFs by gold standard variants
 }

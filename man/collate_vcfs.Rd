@@ -9,6 +9,9 @@ collate_vcfs(vcf_list, tidy_function)
 \arguments{
 \item{tidy_function}{}
 }
+\value{
+
+}
 \description{
 S3 Method for collating vcfs
 }

@@ -9,6 +9,9 @@ plot_gene_objects(gene_objects, title, filename)
 \arguments{
 \item{filename}{}
 }
+\value{
+
+}
 \description{
 Title
 }

@@ -9,6 +9,9 @@ retidy_vcfs(my_vcfs, my_pon, datatype)
 \arguments{
 \item{my_pon}{}
 }
+\value{
+
+}
 \description{
 Retidy vcfs
 }

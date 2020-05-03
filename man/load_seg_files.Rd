@@ -9,6 +9,9 @@ load_seg_files(seg_file)
 \arguments{
 \item{seg_file}{}
 }
+\value{
+
+}
 \description{
 Load Segmentation Files
 }

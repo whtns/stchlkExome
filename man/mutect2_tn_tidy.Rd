@@ -9,6 +9,9 @@ mutect2_tn_tidy(my_vcf)
 \arguments{
 \item{my_vcf}{}
 }
+\value{
+
+}
 \description{
 Tidy T/N VCF from Mutect2
 }

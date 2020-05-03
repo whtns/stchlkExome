@@ -9,6 +9,9 @@ load_all_objs(segmentation_files)
 \arguments{
 \item{segmentation_files}{}
 }
+\value{
+
+}
 \description{
 Load All Objects
 }

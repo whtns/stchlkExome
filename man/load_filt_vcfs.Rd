@@ -9,6 +9,9 @@ load_filt_vcfs(vcf_file_paths, gold_vars)
 \arguments{
 \item{gold_vars}{}
 }
+\value{
+
+}
 \description{
 Load Filtered VCFs
 }

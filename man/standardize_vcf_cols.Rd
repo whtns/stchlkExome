@@ -9,6 +9,9 @@ standardize_vcf_cols(vcf_df)
 \arguments{
 \item{vcf_df}{}
 }
+\value{
+
+}
 \description{
 Standardize Vcf column names for PON samples
 }

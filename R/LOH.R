@@ -13,22 +13,20 @@
 #' @export
 #'
 #' @examples
-plot_base_loh <- function(cov_granges, name_cov_grange, tn, kp, chr_select, mid.regs, ...){
+plot_base_loh <- function(cov_granges, tn, kp, chr_select, mid.regs, tr.i, tr.o, cex = 0.2, ...){
 
-  tr.i <- 0.037
-  tr.o <- 0.040
   kp <- kpDataBackground(kp, r0=tr.o*tn, r1=tr.o*tn+tr.i) %>%
     # kpAxis(ymin =0, y = 1, cex = 0.3, r0=(tr.o*tn), r1=(tr.o*tn+tr.i)) %>%
     # kpPlotRegions(data = mid.regs, r0=tr.o*tn, r1=tr.o*tn+tr.i, col = NA, lty=1, lwd=0.5, border="blue", data.panel=2) %>%
     kpHeatmap(cov_granges, y = cov_granges$mBAF, ymin=0, ymax=1, r0=tr.o*tn, r1=tr.o*tn+tr.i, colors = c("blue", "white", "red")) %>%
-    kpAddLabels(labels=name_cov_grange, r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.035, col="red", cex=1.3) %>%
+    kpAddLabels(labels=as.character(unique(cov_granges$Assay)), r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.035, col="black", cex=cex) %>%
     identity()
 }
 
 #' Title
 #'
+#'
 #' @param raw_cov_list
-#' @param file_name
 #' @param chr_select
 #' @param mid.regs
 #' @param marker_granges
@@ -38,16 +36,15 @@ plot_base_loh <- function(cov_granges, name_cov_grange, tn, kp, chr_select, mid.
 #' @export
 #'
 #' @examples
-plot_loh_granges_to_file <- function(raw_cov_list, file_name, chr_select = "auto", mid.regs, marker_granges, plotheight = 10, plotwidth = 50, ...) {
-  tr.i <- 0.037
-  tr.o <- 0.040
-  num_seg_granges <- seq(0, length(raw_cov_list)-1)
-  tn = max(num_seg_granges)+1
-  pdf(file_name, width = plotwidth, height = plotheight)
+plot_loh_granges <- function(raw_cov_list, chr_select = "auto", mid.regs, marker_granges, cex = 0.6, marker_labels = "Peak Sites", ...) {
+  num_baf_granges <- seq(0, length(raw_cov_list)-1)
+  tn = max(num_baf_granges)+1
+  tr.o = 0.99/tn
+  tr.i = tr.o - 0.002
   plot.params <- getDefaultPlotParams(plot.type=5)
 
   plot.params$ideogramheight <- 3
-  plot.params$topmargin <- 9
+  plot.params$topmargin <- 10
   plot.params$data1height <- 1
   plot.params$data1inmargin <- 1
   plot.params$data2inmargin <- 1
@@ -55,44 +52,21 @@ plot_loh_granges_to_file <- function(raw_cov_list, file_name, chr_select = "auto
   plot.params$data1outmargin <- 1
   plot.params$bottommargin <- 1
   plot.params$leftmargin <- 0.1
-  kp <- plotKaryotype(genome="hg19", plot.type = 5, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select) %>%
-    kpAddChromosomeNames(col="red", cex=1.3, srt=65)
-  num_baf_granges <- seq(0, length(raw_cov_list)-1)
-  for (i in names(raw_cov_list)) {
-    num_baf <- which(names(raw_cov_list) == i) - 1
-    plot_base_loh(raw_cov_list[[i]], i, num_baf, kp, chr_select, mid.regs)
+
+  dots = list(...)
+  plot.params[names(dots)] <- dots
+
+  kp <- plotKaryotype(genome="hg19", plot.type = 5, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select, ideogram.plotter = kpAddCytobandsAsLine, ...) %>%
+    kpAddChromosomeNames(col="black", cex = cex, srt=65)
+  map2(raw_cov_list, num_baf_granges, plot_base_loh, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...)
+  # for (i in names(raw_cov_list)) {
+  #   num_baf <- which(names(raw_cov_list) == i) - 1
+  #   plot_base_loh(raw_cov_list[[i]], i, num_baf, kp, chr_select, mid.regs, tr.i = tr.i, tr.o = tr.o, cex = cex, ...)
+  # }
+  if(!is.null(marker_granges)){
+    kpPlotRegions(kp, data = marker_granges, r0=tr.o*tn, r1=tr.o*tn+tr.i, col = "black", lty=1, lwd=0.25, border="black", data.panel=2) %>%
+      kpAddLabels(labels=marker_labels, r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.04, col="black", cex=cex, data.panel = 2)
   }
-  kpPlotRegions(kp, data = marker_granges, r0=tr.o*tn, r1=tr.o*tn+tr.i, col = "black", lty=1, lwd=0.25, border="black", data.panel=2) %>%
-    kpAddLabels(labels="Peak Sites", r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.04, col="red", cex=1.3, data.panel = 2)
-  dev.off()
-}
-
-#' Plot Chromosome to File
-#'
-#' @param raw_cov_list
-#' @param file_name
-#' @param chr_select
-#' @param ...
-#'
-#' @return
-#' @export
-#'
-#' @examples
-plot_chrom_to_file <- function(raw_cov_list, file_name, chr_select, ...) {
-  png("Plot3.png", width = 4, height = 4, units = 'in', res = 800)
-  plot.params <- getDefaultPlotParams(plot.type=1)
-  plot.params <- getDefaultPlotParams(plot.type=1)
-  plot.params$ideogramheight <- 5
-  plot.params$data1height <- 150
-  plot.params$data1inmargin <- 1
-  plot.params$bottommargin <- 20
-  plot.params$topmargin <- 20
-  kp <- plotKaryotype(genome="hg19", plot.type = 1, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select) %>%
-    kpAddChromosomeNames(col="red", cex = 0.3) %>%
-    kpAddBaseNumbers()
-
-  map2(raw_cov_list, num_baf_granges, plot_base_seg, kp, chr_select)
-  dev.off()
 }
 
 

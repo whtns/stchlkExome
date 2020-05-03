@@ -9,6 +9,9 @@ plot_bin_objects(bin_objects, filename)
 \arguments{
 \item{filename}{}
 }
+\value{
+
+}
 \description{
 Title
 }

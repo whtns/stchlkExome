@@ -9,6 +9,9 @@ collate_scna_segments(cohort, segmentation_files, as_grange = TRUE)
 \arguments{
 \item{as_grange}{}
 }
+\value{
+
+}
 \description{
 Title
 }

@@ -9,6 +9,9 @@ clean_bin_objs(segmentation_files, ...)
 \arguments{
 \item{...}{}
 }
+\value{
+
+}
 \description{
 Title
 }

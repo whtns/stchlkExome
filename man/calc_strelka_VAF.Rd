@@ -9,6 +9,9 @@ calc_strelka_VAF(nuc_counts)
 \arguments{
 \item{nuc_counts}{}
 }
+\value{
+
+}
 \description{
 Calculate Strelka VAF
 }

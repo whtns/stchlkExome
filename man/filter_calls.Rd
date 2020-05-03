@@ -9,6 +9,9 @@ filter_calls(myv)
 \arguments{
 \item{my_variants}{}
 }
+\value{
+
+}
 \description{
 Filter Variant Calls
 }

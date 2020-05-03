@@ -9,6 +9,9 @@ load_vcfs(vcf_file_paths, sample_type)
 \arguments{
 \item{sample_type}{}
 }
+\value{
+
+}
 \description{
 Load VCFs
 }

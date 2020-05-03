@@ -9,6 +9,9 @@ read_tidy_csvs(basepath)
 \arguments{
 \item{basepath}{}
 }
+\value{
+
+}
 \description{
 Read Tidy csvs
 }

@@ -9,6 +9,9 @@ print_tl(variant_df, tname)
 \arguments{
 \item{tname}{}
 }
+\value{
+
+}
 \description{
 print length of table (to show how many variant present)
 }

@@ -9,6 +9,9 @@ sort_T_b4_CL(karyo_granges)
 \arguments{
 \item{karyo_granges}{}
 }
+\value{
+
+}
 \description{
 Sort Tumor before Cell Line
 }

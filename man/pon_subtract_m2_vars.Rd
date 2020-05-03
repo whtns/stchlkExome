@@ -9,6 +9,9 @@ pon_subtract_m2_vars(my_variants, my_pon)
 \arguments{
 \item{my_pon}{}
 }
+\value{
+
+}
 \description{
 Antijoin Mutect Variants with Panel of Normals
 }

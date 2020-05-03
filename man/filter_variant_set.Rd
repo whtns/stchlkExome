@@ -9,6 +9,9 @@ filter_variant_set(my_variants, datatype, gnomad_threshold = 5e-04)
 \arguments{
 \item{datatype}{}
 }
+\value{
+
+}
 \description{
 Fitler Set of Variants
 }

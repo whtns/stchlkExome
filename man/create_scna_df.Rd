@@ -9,6 +9,9 @@ create_scna_df(segmentation_files, cohort)
 \arguments{
 \item{cohort}{}
 }
+\value{
+
+}
 \description{
 Title
 }

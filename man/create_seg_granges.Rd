@@ -9,6 +9,9 @@ create_seg_granges(karyo_seg)
 \arguments{
 \item{karyo_seg}{}
 }
+\value{
+
+}
 \description{
 Create Segmentation Granges
 }

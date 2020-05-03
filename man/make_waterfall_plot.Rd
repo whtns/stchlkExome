@@ -2,13 +2,25 @@
 % Please edit documentation in R/plotting.R
 \name{make_waterfall_plot}
 \alias{make_waterfall_plot}
-\title{Make a Waterfall Plot}
+\title{Make a waterfall plot}
 \usage{
-make_waterfall_plot(my_variants, clindata, gene_lab_size = 10)
+make_waterfall_plot(
+  my_variants,
+  mainPalette = "ggsci::default_igv",
+  clindata,
+  subset_genes = NULL,
+  sample_order = NULL,
+  clinLegCol = 5,
+  mainLabelSize = 12,
+  ...
+)
 }
 \arguments{
-\item{gene_lab_size}{}
+\item{clindata}{}
+}
+\value{
+
 }
 \description{
-Make a Waterfall Plot
+Make a waterfall plot
 }

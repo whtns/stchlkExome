@@ -29,5 +29,6 @@ Imports:
     ensemblVEP,
     plyranges,
     rfPred,
-    tibble
-RoxygenNote: 6.1.1
+    tibble,
+    ggplotify
+RoxygenNote: 7.1.0

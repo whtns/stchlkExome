@@ -191,9 +191,24 @@ create_seg_granges <- function(karyo_seg){
   seg_names <- lapply(seg_names, sort, decreasing = TRUE)
   seg_granges <- seg_granges[unlist(seg_names)]
 
-  seg_granges <- seg_granges[!grepl("N", names(seg_granges))]
+  # seg_granges <- seg_granges[!grepl("N", names(seg_granges))]
 
 
+}
+
+#' Plot SCNA group
+#'
+#' @param raw_cov_list
+#' @param num_seg_granges
+#' @param group_space
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plot_scna_group <- function(raw_cov_list, num_seg_granges, group_space = 0.1, ...){
+  map2(raw_cov_list, num_seg_granges, plot_base_seg, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i+group_space, tr.o = tr.o+group_space, ...)
 }
 
 
@@ -203,79 +218,72 @@ create_seg_granges <- function(karyo_seg){
 #' @param tn
 #' @param kp
 #' @param chr_select
+#' @param cex
+#' @param tr.i
+#' @param tr.o
 #' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-plot_base_seg <- function(cov_granges, tn, kp, chr_select, ...){
+plot_base_seg <- function(cov_granges, tn, kp, chr_select, cex, tr.i, tr.o, ...){
 
   # kp <- plotKaryotype(genome="hg19", plot.type = 1, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select) %>%
   #   kpAddChromosomeNames(col="red", cex = 0.3) %>%
   #   kpAddBaseNumbers()
 
-
-  tr.i <- 0.037
-  tr.o <- 0.040
-
-  print(unique(cov_granges$sample_id))
+  # print(unique(cov_granges$sample_id))
   kp <- kpDataBackground(kp, r0=tr.o*tn, r1=tr.o*tn+tr.i, data.panel = 2) %>%
     # kpAxis(ymin =0, y = 1, cex = 0.3, r0=(tr.o*tn), r1=(tr.o*tn+tr.i)) %>%
     kpHeatmap(cov_granges, y = cov_granges$seg.mean, ymin=-1, ymax=1, r0=tr.o*tn, r1=tr.o*tn+tr.i, colors = c("blue", "white", "red"), data.panel = 2) %>%
-    kpAddLabels(labels=unique(cov_granges$sample_id), r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.04, col="red", cex=1.3, data.panel = 2) %>%
+    kpAddLabels(labels=unique(cov_granges$sample_id), r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.04, col="black", cex=cex, data.panel = 2) %>%
     identity()
 
 }
 
+
 #' Plot All Segmentation to Heatmap
 #'
 #' @param raw_cov_list
-#' @param file_name
 #' @param chr_select
 #' @param marker_granges
-#' @param plotwidth
-#' @param plotheight
-#' @param res
+#' @param marker_labels
+#' @param cex
 #' @param ...
+#'
 #' @return
 #' @export
 #'
 #' @examples
-plot_scna_granges_to_file <- function(raw_cov_list, file_name, chr_select = "auto", marker_granges = NULL, file_ext = "pdf", plotwidth = 40, plotheight = 10, res = 400, ...) {
-  tr.i <- 0.037
-  tr.o <- 0.040
+plot_scna_granges <- function(raw_cov_list, chr_select = "auto", marker_granges = NULL, marker_labels = "Peak Sites", cex = 0.6, ...) {
   num_seg_granges <- seq(0, length(raw_cov_list)-1)
   tn = max(num_seg_granges)+1
-  if (file_ext == "pdf"){
-    file_name = paste0(file_name, ".pdf")
-    pdf(file_name, width = plotwidth, height = plotheight)
-  } else if (file_ext == "tiff"){
-    file_name = paste0(file_name, ".tiff")
-    tiff(file_name, width = plotwidth, height = plotheight, units = "in", res = res)
-  }
+  tr.o = 0.99/tn
+  tr.i = tr.o - 0.002
+  # cex = tr.o*cex_scale
   plot.params <- getDefaultPlotParams(plot.type=3)
   plot.params$ideogramheight <- 3
-  plot.params$topmargin <- 9
+  plot.params$topmargin <- 10
   plot.params$data1height <- 1
   plot.params$data1inmargin <- 1
   plot.params$data2inmargin <- 1
   plot.params$data2height <- 150
   plot.params$data1outmargin <- 1
-  plot.params$bottommargin <- 1
+  plot.params$bottommargin <- 0.1
   plot.params$leftmargin <- 0.1
 
   dots = list(...)
   plot.params[names(dots)] <- dots
 
-  kp <- plotKaryotype(genome="hg19", plot.type = 3, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select) %>%
-    kpAddChromosomeNames(col="red", cex = 1.3, srt = 65)
-  map2(raw_cov_list, num_seg_granges, plot_base_seg, kp, chr_select, marker_granges)
-  if(!is.null(marker_granges)){
-    kpPlotRegions(kp, data = marker_granges, r0=tr.o*tn, r1=tr.o*tn+tr.i, col = "black", lty=1, lwd=0.25, border="black", data.panel=2) %>%
-    kpAddLabels(labels="Peak Sites", r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.04, col="red", cex=1.3, data.panel = 2)
-  }
-  dev.off()
+    kp <- plotKaryotype(genome="hg19", plot.type = 3, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select, ideogram.plotter = kpAddCytobandsAsLine, ...) %>%
+      kpAddChromosomeNames(col="black", cex = cex, srt = 65)
+    purrr::map(raw_cov_list, ~plot_scna_group(.x, num_seg_granges, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...))
+    # map2(raw_cov_list, num_seg_granges, plot_base_seg, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...)
+    if(!is.null(marker_granges)){
+      kpPlotRegions(kp, data = marker_granges, r0=tr.o*tn, r1=tr.o*tn+tr.i, col = "black", lty=1, lwd=0.25, border="black", data.panel=2) %>%
+      kpAddLabels(labels=marker_labels, r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.04, col="black", cex=cex, data.panel = 2)
+    }
 }
 
 #' Load Segmentation Files
@@ -287,7 +295,7 @@ plot_scna_granges_to_file <- function(raw_cov_list, file_name, chr_select = "aut
 #'
 #' @examples
 load_seg_files <- function(seg_file){
-  list.files(seg_file, "^segment.Rdata$", recursive = TRUE, full.names = TRUE)
+  fs::path_filter(seg_file, "*segment.Rdata$")
 }
 
 #' Title
@@ -498,62 +506,15 @@ create_scna_df <- function(segmentation_files, cohort){
     identity()
 
   if (cohort == "vc"){
-    karyo_seg <- karyo_seg[!grepl("none", karyo_seg$ID),]
-    karyo_seg <- karyo_seg[!grepl("N", karyo_seg$sample_id),]
-
-  } else if(cohort == "reynolds"){
-    karyo_seg <- karyo_seg[grepl("none", karyo_seg$ID),]
+    # karyo_seg <- karyo_seg[!grepl("none", karyo_seg$ID),]
+    # karyo_seg <- karyo_seg[!grepl("N", karyo_seg$sample_id),]
+    karyo_seg
   }
 
-}
+  if(cohort == "reynolds") karyo_seg <- karyo_seg[grepl("none", karyo_seg$ID),]
 
-#' Title
-#'
-#' @param cohort
-#'
-#' @return
-#' @export
-#'
-#' @examples
-collate_scna_segments_old <- function(cohort) {
+  return(karyo_seg)
 
-  # browser()
-
-  if (cohort == "vc"){
-    seg_file_1 = "~/rb_pipeline/output/copywriter/vc/50kb/CNAprofiles/"
-    seg_file_2 = "~/rb_pipeline/output/copywriter/vc/50kb_additional/CNAprofiles/"
-    segmentation_files <- c(seg_file_1, seg_file_2)
-    segmentation_files <- lapply(segmentation_files, load_seg_files)
-    segmentation_objects <- do.call(c, lapply(segmentation_files, load_seg_objs))
-
-    segmentation_objects <- segmentation_objects[!grepl("none|N.*N", names(segmentation_objects))]
-
-
-    # split at "_"
-    names_reformatted <- str_split_fixed(names(segmentation_objects), "_", n = 2)[,1]
-
-    #split at "."
-    names_reformatted <- str_split_fixed(names_reformatted, "\\.", n = 2)[,2]
-
-    #assemble name
-    names(segmentation_objects) <- paste0("CHLA-VC-RB", gsub("\\.", "\\-", names_reformatted))
-
-    return(segmentation_objects)
-
-  } else if (cohort == "reynolds"){
-
-    seg_file_3 = "~/rb_pipeline/output/copywriter/reynolds/50kb/CNAprofiles/"
-    segmentation_files <- seg_file_3
-    segmentation_files <- lapply(segmentation_files, load_seg_files)
-    segmentation_objects <- do.call(c, lapply(segmentation_files, load_seg_objs))
-
-    segmentation_objects <- segmentation_objects[grepl("none", names(segmentation_objects))]
-
-    names(segmentation_objects) <- paste0("CHLA-RB", stringr::str_sub(names(segmentation_objects), start = 6L, end  = 8L))
-
-    return(segmentation_objects)
-
-  }
 }
 
 #' Title
@@ -571,7 +532,7 @@ collate_scna_segments <- function(cohort, segmentation_files, as_grange = TRUE) 
 
   segmentation_files = segmentation_files[[cohort]]
 
-  segmentation_files <- lapply(segmentation_files, load_seg_files)
+  segmentation_files <- purrr::map(segmentation_files, load_seg_files)
   karyo_seg <- create_scna_df(segmentation_files, cohort = cohort)
 
   if (!as_grange) return(karyo_seg)

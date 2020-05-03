@@ -9,6 +9,9 @@ compare_t_cl(cobrinik_vars, caller)
 \arguments{
 \item{caller}{}
 }
+\value{
+
+}
 \description{
 Compare Variants in Matched Tumor and Cell Line Samples
 }

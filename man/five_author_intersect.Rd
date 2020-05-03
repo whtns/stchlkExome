@@ -4,11 +4,13 @@
 \alias{five_author_intersect}
 \title{Compare variants with four prior studies}
 \usage{
-five_author_intersect(cobrinik_vars, reference_vars, reference_genes,
-  caller)
+five_author_intersect(cobrinik_vars, reference_vars, reference_genes, caller)
 }
 \arguments{
 \item{caller}{}
+}
+\value{
+
 }
 \description{
 Compare variants with four prior studies

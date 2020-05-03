@@ -9,6 +9,9 @@ load_bin_objs(segmentation_files)
 \arguments{
 \item{segmentation_files}{}
 }
+\value{
+
+}
 \description{
 Load Bin Objects
 }

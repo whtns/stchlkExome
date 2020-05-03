@@ -9,6 +9,9 @@ mutect2_pon_tidy(my_vcf)
 \arguments{
 \item{my_vcf}{}
 }
+\value{
+
+}
 \description{
 Tidy panel of normals VCF from Mutect2
 }

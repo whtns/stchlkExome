@@ -9,6 +9,9 @@ find_seg_genes(my_data, outfile = NULL)
 \arguments{
 \item{outfile}{}
 }
+\value{
+
+}
 \description{
 Title
 }

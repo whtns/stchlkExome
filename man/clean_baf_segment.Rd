@@ -9,6 +9,9 @@ clean_baf_segment(baf_segment)
 \arguments{
 \item{baf_segment}{}
 }
+\value{
+
+}
 \description{
 Title
 }

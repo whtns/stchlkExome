@@ -9,6 +9,9 @@ pon_subtract_m2_reynolds(my_variants, my_pon)
 \arguments{
 \item{my_pon}{}
 }
+\value{
+
+}
 \description{
 Antijoin Mutect2 Reynolds Samples with Panel of Normals
 }

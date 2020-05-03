@@ -9,6 +9,9 @@
 \arguments{
 \item{tidy_function}{}
 }
+\value{
+
+}
 \description{
 Collate vcfs
 }

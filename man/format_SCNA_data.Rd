@@ -4,11 +4,13 @@
 \alias{format_SCNA_data}
 \title{Title}
 \usage{
-format_SCNA_data(dna_copy_object, samples, remove_pattern,
-  sample_type = NULL)
+format_SCNA_data(dna_copy_object, samples, remove_pattern, sample_type = NULL)
 }
 \arguments{
 \item{sample_type}{}
+}
+\value{
+
 }
 \description{
 Title

@@ -4,10 +4,13 @@
 \alias{plot_base_seg}
 \title{Plot Base Segmentation}
 \usage{
-plot_base_seg(cov_granges, tn, kp, chr_select, ...)
+plot_base_seg(cov_granges, tn, kp, chr_select, cex, tr.i, tr.o, ...)
 }
 \arguments{
 \item{...}{}
+}
+\value{
+
 }
 \description{
 Plot Base Segmentation

@@ -9,6 +9,9 @@ clean_gene_objs(peak_genes_dat, ...)
 \arguments{
 \item{...}{}
 }
+\value{
+
+}
 \description{
 Title
 }

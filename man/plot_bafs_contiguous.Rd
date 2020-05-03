@@ -9,6 +9,9 @@ plot_bafs_contiguous(raw_cov_data, plot_title, ...)
 \arguments{
 \item{...}{}
 }
+\value{
+
+}
 \description{
 Title
 }
