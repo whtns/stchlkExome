@@ -4,14 +4,23 @@
 \alias{run_webgestaltr}
 \title{Run WebGestaltR}
 \usage{
-run_webgestaltr(var_df, gene_list_path)
+run_webgestaltr(
+  gene_list,
+  gene_list_path,
+  enrichDatabase = "geneontology_Biological_Process",
+  enrichMethod = "ORA",
+  topThr = 25
+)
 }
 \arguments{
-\item{gene_list_path}{}
+\item{...}{}
 }
 \value{
 
 }
 \description{
 Run WebGestaltR
+}
+\examples{
+
 }

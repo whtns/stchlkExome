@@ -131,7 +131,7 @@ RbindSegPlot <- function(SCNA_obj_list, sample_type = NULL, ...){
   SCNA_obj_list <- lapply(SCNA_obj_list, SingleSegPlot)
   # seg_obj_list <- lapply(SCNA_obj_list, "[[", 1)
   # point_obj_list <- lapply(SCNA_obj_list, "[[", 2)
-  seg_obj_df <- rbindlist(SCNA_obj_list, idcol = "sample_id")
+  seg_obj_df <- dplyr::bind_rows(SCNA_obj_list, .id = "sample_id")
   # point_obj_df <- rbindlist(point_obj_list, idcol = "sample_id")
   # return(list("segments" = seg_obj_df, "bins" = point_obj_df))
   return(list("segments" = seg_obj_df))
@@ -166,14 +166,14 @@ create_seg_granges <- function(karyo_seg){
 
   karyo_seg_gains <- karyo_seg %>%
     dplyr::filter(seg.mean > 0) %>%
-    mutate(seg.mean = ifelse(seg.mean > ceiling_gain, ceiling_gain, seg.mean)) %>%
-    mutate(seg.mean = rescale(seg.mean, to=c(0,1))) %>%
+    mutate(seg.mean.scaled = ifelse(seg.mean > ceiling_gain, ceiling_gain, seg.mean)) %>%
+    mutate(seg.mean.scaled = rescale(seg.mean.scaled, to=c(0,1))) %>%
     identity()
 
   karyo_seg_losses <- karyo_seg %>%
     dplyr::filter(seg.mean <= 0) %>%
-    mutate(seg.mean = ifelse(seg.mean < floor_loss, floor_loss, seg.mean)) %>%
-    mutate(seg.mean = rescale(seg.mean, to=c(-1,0))) %>%
+    mutate(seg.mean.scaled = ifelse(seg.mean < floor_loss, floor_loss, seg.mean)) %>%
+    mutate(seg.mean.scaled = rescale(seg.mean.scaled, to=c(-1,0))) %>%
     identity()
 
   karyo_seg <- bind_rows(karyo_seg_gains, karyo_seg_losses)
@@ -207,8 +207,16 @@ create_seg_granges <- function(karyo_seg){
 #' @export
 #'
 #' @examples
-plot_scna_group <- function(raw_cov_list, num_seg_granges, group_space = 0.1, ...){
-  map2(raw_cov_list, num_seg_granges, plot_base_seg, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i+group_space, tr.o = tr.o+group_space, ...)
+plot_scna_group <- function(raw_cov_list, num_seg_granges, group_space = 0.1, kp, tr.i, tr.o, ...){
+  # num_seg_granges[1] <- num_seg_granges[1]+group_space
+
+  num_seg_granges <- num_seg_granges + c(1, rep(-1, length(num_seg_granges)-1))*group_space*seq(length(num_seg_granges))
+
+  # num_seg_granges <- num_seg_granges + rep(c(1,-1), length(num_seg_granges))[1:length(num_seg_granges)]*group_space
+
+  # kpDataBackground(kp, r0=tr.o*num_seg_granges[1], r1=tr.o*num_seg_granges[1]+tr.i, data.panel = 2) %>%
+  #   kpAbline(h=0, r0=tr.o*num_seg_granges[1], r1=tr.o*num_seg_granges[1]+tr.i, data.panel = 2)
+  map2(raw_cov_list, num_seg_granges, plot_base_seg, kp = kp, tr.i = tr.i, tr.o = tr.o, ...)
 }
 
 
@@ -234,9 +242,9 @@ plot_base_seg <- function(cov_granges, tn, kp, chr_select, cex, tr.i, tr.o, ...)
   #   kpAddBaseNumbers()
 
   # print(unique(cov_granges$sample_id))
-  kp <- kpDataBackground(kp, r0=tr.o*tn, r1=tr.o*tn+tr.i, data.panel = 2) %>%
+  kp <- kpDataBackground(kp, r0=tr.o*tn, r1=tr.o*tn+tr.i, data.panel = 2, color = "white") %>%
     # kpAxis(ymin =0, y = 1, cex = 0.3, r0=(tr.o*tn), r1=(tr.o*tn+tr.i)) %>%
-    kpHeatmap(cov_granges, y = cov_granges$seg.mean, ymin=-1, ymax=1, r0=tr.o*tn, r1=tr.o*tn+tr.i, colors = c("blue", "white", "red"), data.panel = 2) %>%
+    kpHeatmap(cov_granges, y = cov_granges$seg.mean.scaled, ymin=-1, ymax=1, r0=tr.o*tn, r1=tr.o*tn+tr.i, colors = c("blue", "white", "red"), data.panel = 2) %>%
     kpAddLabels(labels=unique(cov_granges$sample_id), r0=tr.o*tn, r1=tr.o*tn+tr.i,  pos=1, label.margin = 0.04, col="black", cex=cex, data.panel = 2) %>%
     identity()
 
@@ -256,8 +264,14 @@ plot_base_seg <- function(cov_granges, tn, kp, chr_select, cex, tr.i, tr.o, ...)
 #' @export
 #'
 #' @examples
-plot_scna_granges <- function(raw_cov_list, chr_select = "auto", marker_granges = NULL, marker_labels = "Peak Sites", cex = 0.6, ...) {
+plot_scna_granges <- function(raw_cov_list, chr_select = "auto", marker_granges = NULL, marker_labels = "Peak Sites", cex = 0.6, group = FALSE, group_space = 0.1, ...) {
+
+  sample_groups <-
+    names(raw_cov_list) %>%
+    stringr::str_extract("^[0-9]*")
+
   num_seg_granges <- seq(0, length(raw_cov_list)-1)
+
   tn = max(num_seg_granges)+1
   tr.o = 0.99/tn
   tr.i = tr.o - 0.002
@@ -276,9 +290,16 @@ plot_scna_granges <- function(raw_cov_list, chr_select = "auto", marker_granges 
   dots = list(...)
   plot.params[names(dots)] <- dots
 
-    kp <- plotKaryotype(genome="hg19", plot.type = 3, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select, ideogram.plotter = kpAddCytobandsAsLine, ...) %>%
-      kpAddChromosomeNames(col="black", cex = cex, srt = 65)
-    purrr::map(raw_cov_list, ~plot_scna_group(.x, num_seg_granges, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...))
+    kp <- plotKaryotype(genome="hg19", plot.type = 3, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select, ideogram.plotter = NULL, ...) %>%
+      kpAddChromosomeNames(col="black", cex = cex)
+    if (group){
+      raw_cov_list <- split(raw_cov_list, sample_groups)
+      num_seg_granges <- split(num_seg_granges, sample_groups)
+      purrr::map2(raw_cov_list, num_seg_granges, ~plot_scna_group(.x, .y, group_space = group_space, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...))
+    } else {
+      map2(raw_cov_list, num_seg_granges, plot_base_seg, kp = kp, cex = cex, tr.i = tr.i, tr.o = tr.o, ...)
+    }
+
     # map2(raw_cov_list, num_seg_granges, plot_base_seg, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...)
     if(!is.null(marker_granges)){
       kpPlotRegions(kp, data = marker_granges, r0=tr.o*tn, r1=tr.o*tn+tr.i, col = "black", lty=1, lwd=0.25, border="black", data.panel=2) %>%

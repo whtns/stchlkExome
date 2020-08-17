@@ -1,4 +1,22 @@
 
+#' Plot SCNA group
+#'
+#' @param raw_cov_list
+#' @param num_seg_granges
+#' @param group_space
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plot_loh_group <- function(cov_granges, num_baf_granges, group_space = 0.1, kp, tr.i, tr.o, ...){
+  num_baf_granges <- num_baf_granges + c(1, rep(-1, length(num_baf_granges)-1))*group_space*seq(length(num_baf_granges))
+  # kpDataBackground(kp, r0=tr.o*num_seg_granges[1], r1=tr.o*num_seg_granges[1]+tr.i, data.panel = 2) %>%
+  #   kpAbline(h=0, r0=tr.o*num_seg_granges[1], r1=tr.o*num_seg_granges[1]+tr.i, data.panel = 2)
+  map2(cov_granges, num_baf_granges, plot_base_loh, kp = kp, tr.i = tr.i, tr.o = tr.o, ...)
+}
+
 #' Title
 #'
 #' @param cov_granges
@@ -36,7 +54,12 @@ plot_base_loh <- function(cov_granges, tn, kp, chr_select, mid.regs, tr.i, tr.o,
 #' @export
 #'
 #' @examples
-plot_loh_granges <- function(raw_cov_list, chr_select = "auto", mid.regs, marker_granges, cex = 0.6, marker_labels = "Peak Sites", ...) {
+plot_loh_granges <- function(raw_cov_list, chr_select = "auto", mid.regs, marker_granges, cex = 0.6, marker_labels = "Peak Sites", group = FALSE, group_space = 0.1, ...) {
+
+  sample_groups <-
+    names(raw_cov_list) %>%
+    stringr::str_extract("^[0-9]*")
+
   num_baf_granges <- seq(0, length(raw_cov_list)-1)
   tn = max(num_baf_granges)+1
   tr.o = 0.99/tn
@@ -56,9 +79,16 @@ plot_loh_granges <- function(raw_cov_list, chr_select = "auto", mid.regs, marker
   dots = list(...)
   plot.params[names(dots)] <- dots
 
-  kp <- plotKaryotype(genome="hg19", plot.type = 5, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select, ideogram.plotter = kpAddCytobandsAsLine, ...) %>%
-    kpAddChromosomeNames(col="black", cex = cex, srt=65)
-  map2(raw_cov_list, num_baf_granges, plot_base_loh, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...)
+  kp <- plotKaryotype(genome="hg19", plot.type = 5, plot.params = plot.params, labels.plotter = NULL, chromosomes = chr_select, ideogram.plotter = NULL, ...) %>%
+    kpAddChromosomeNames(col="black", cex = cex)
+
+  if (group){
+    raw_cov_list <- split(raw_cov_list, sample_groups)
+    num_baf_granges <- split(num_baf_granges, sample_groups)
+    purrr::map2(raw_cov_list, num_baf_granges, ~plot_loh_group(.x, .y, group_space = group_space, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...))
+  } else {
+    map2(raw_cov_list, num_baf_granges, plot_base_loh, kp = kp, chr_select = chr_select, cex = cex, tr.i = tr.i, tr.o = tr.o, ...)
+  }
   # for (i in names(raw_cov_list)) {
   #   num_baf <- which(names(raw_cov_list) == i) - 1
   #   plot_base_loh(raw_cov_list[[i]], i, num_baf, kp, chr_select, mid.regs, tr.i = tr.i, tr.o = tr.o, cex = cex, ...)

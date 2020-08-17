@@ -11,6 +11,8 @@ plot_loh_granges(
   marker_granges,
   cex = 0.6,
   marker_labels = "Peak Sites",
+  group = FALSE,
+  group_space = 0.1,
   ...
 )
 }

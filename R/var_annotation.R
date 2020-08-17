@@ -192,8 +192,6 @@ strelka_tidy_snvs <- function(my_vcf){
 }
 
 
-
-
 # collate vcfs ------------------------------------------------------------
 
 #' S3 Method for collating vcfs
@@ -220,7 +218,7 @@ collate_vcfs <- function(vcf_list, tidy_function) {
 #' @examples
 collate_vcfs.pon <- function(vcf_list, tidy_function){
 
-    evcf_list <- purrr::map(vcf_list, ~tidy_function(.x))
+  evcf_list <- purrr::map(vcf_list, ~tidy_function(.x))
   evcf_list <- purrr::map(evcf_list, standardize_vcf_cols)
 
   tidy_vcfs <- dplyr::bind_rows(evcf_list, .id = "sample")

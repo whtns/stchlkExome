@@ -20,7 +20,7 @@ make_waterfall_plot <- function(my_variants, mainPalette = "ggsci::default_igv",
 
   clindata <- clindata %>%
     tidyr::gather("variable", "value", -sample) %>%
-    dplyr::filter(!grepl("age|author", variable)) %>%
+    # dplyr::filter(!grepl("age|author", variable)) %>%
     dplyr::filter(sample %in% unique(my_variants$sample)) %>%
     # rename(sample = Sample) %>%
     identity()

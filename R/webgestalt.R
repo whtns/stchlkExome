@@ -73,25 +73,31 @@ list_recurrent_genes <- function(variant_df){
 
 #' Run WebGestaltR
 #'
-#' @param var_df
+#' @param gene_list
 #' @param gene_list_path
+#' @param enrichDatabase
+#' @param ...
 #'
 #' @return
 #' @export
 #'
 #' @examples
-run_webgestaltr <- function(var_df, gene_list_path) {
+#'
+run_webgestaltr <- function(gene_list, gene_list_path, enrichDatabase = "geneontology_Biological_Process", enrichMethod = "ORA", topThr = 25) {
   gene_list_out <- fs::path(path_dir(gene_list_path), paste0(path_file(path_ext_remove(gene_list_path)), "_results"))
   dir_create(gene_list_out)
+  write_delim(gene_list, gene_list_path)
 
-  write_delim(var_df["gene"], gene_list_path)
-
-  test0 <- WebGestaltR(interestGeneFile = gene_list_path,
+  test0 <- WebGestaltR(enrichMethod = enrichMethod,
+                       enrichDatabase = enrichDatabase,
+                       interestGeneFile = gene_list_path,
                        interestGeneType = "genesymbol",
                        referenceSet = "genome",
-                       enrichDatabase = "geneontology_Biological_Process",
                        outputDirectory = gene_list_out,
                        sigMethod = "top",
-                       topThr = 25)
+                       topThr = topThr,
+                       fdrThr = 1)
+  return(test0)
+
 }
 

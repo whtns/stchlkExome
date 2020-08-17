@@ -10,6 +10,8 @@ plot_scna_granges(
   marker_granges = NULL,
   marker_labels = "Peak Sites",
   cex = 0.6,
+  group = FALSE,
+  group_space = 0.1,
   ...
 )
 }

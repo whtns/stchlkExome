@@ -150,7 +150,7 @@ filter_calls  <- function (myv) {
 
   myv <- myv %>%
     # dplyr::filter(FILTER == "PASS" ) %>% # filter out variants which don't meet variant caller filtering criteria
-    dplyr::filter(!grepl(paste(c("intron_variant", "synonymous"), collapse="|"), Consequence)) %>% # filter out intronic or synonymous
+    # dplyr::filter(!grepl(paste(c("intron_variant", "synonymous"), collapse="|"), Consequence)) %>% # filter out intronic or synonymous
     dplyr::filter_at(vars(one_of(AF_columns)), ~ . > 0.05) %>% # filter out tumor variant allele frequency less than 5 percent
     dplyr::filter_at(vars(one_of(AD_columns)), ~ . > 5) %>% # filter out tumor alternate allele read depth less than 5
     identity()
@@ -387,3 +387,103 @@ load_filt_vcfs <- function(vcf_file_paths, gold_vars){
   return(vcf_sample_list)
 }
 
+#' Recalculate geo from webgestalt
+#'
+#' @param geo_output
+#' @param gene_input
+#' @param intgenelength
+#'
+#' @return
+#' @export
+#'
+#' @examples
+recalculate_geo <- function(geo_output, gene_input, intgenelength = 245){
+  # browser()
+  gene_input <- gene_input %>%
+    janitor::tabyl(gene) %>%
+    dplyr::mutate(userId = map2(.$gene, .$n, rep)) %>%
+    dplyr::mutate(userId = map_chr(.$userId, paste0, collapse = ";")) %>%
+    identity()
+
+  old_enrichment <- geo_output
+
+  enrichment <- old_enrichment %>%
+    dplyr::mutate(symbols = str_split(userId, ";")) %>%
+    select(-userId) %>%
+    unnest(symbols) %>%
+    dplyr::left_join(gene_input, by = c("symbols" = "gene")) %>%
+    dplyr::group_by(geneSet) %>%
+    dplyr::mutate(userId = paste0(userId, collapse = ";")) %>%
+    dplyr::mutate(added_count = n-1)
+
+  geneSet_adds <- enrichment %>%
+    dplyr::select(geneSet, added_count) %>%
+    dplyr::summarise(added_count = sum(added_count))
+
+  enrichment2 <-
+    enrichment %>%
+    select(-added_count, -symbols, -n, -percent) %>%
+    dplyr::distinct() %>%
+    dplyr::right_join(geneSet_adds, by = "geneSet") %>%
+    # dplyr::filter(added_count.y == max(added_count.y)) %>%
+    identity()
+
+  # FDR size 6306
+  new_enrichment <-
+    enrichment2 %>%
+    dplyr::mutate(overlap = overlap + added_count) %>%
+    dplyr::mutate(enrichmentRatio = overlap/expect) %>%
+    dplyr::mutate(pValue = 1-phyper(overlap - 1, intgenelength, 16666 - intgenelength, size, lower.tail=TRUE, log.p=FALSE)) %>%
+    # dplyr::select(-n, -percent) %>%
+    dplyr::mutate(FDR = ifelse(added_count == 0, FDR, p.adjust(pValue, method = "BH"))) %>%
+    dplyr::distinct(.keep_all = TRUE) %>%
+    dplyr::slice_head(n = 20) %>%
+    identity()
+
+  enrichment_compare <- dplyr::left_join(old_enrichment, new_enrichment, by = c("geneSet", "description", "link"), suffix = c(".old", ".new")) %>%
+    select(order(colnames(.))) %>%
+    dplyr::filter(!is.na(enrichmentRatio.new))
+
+  go_column_names <- c("size", "overlap", "expect", "enrichmentRatio",
+                       "pValue", "FDR", "overlapId", "userId")
+
+  go_columns = paste0(go_column_names, ".new")
+  names(go_columns) <- go_column_names
+
+  go_columns <- c("geneSet", "description", go_columns)
+
+  test2 <- enrichment_compare %>%
+    dplyr::select(go_columns)
+}
+
+
+#' Title
+#'
+#' @param vars
+#' @param antiseries
+#'
+#' @return
+#' @export
+#'
+#' @examples
+calc_recurrent_vars <- function(vars, antiseries = "CHLA-RB") {
+
+  recurrent_vars <-
+    vars %>%
+    dplyr::filter(series != antiseries) %>%
+    dplyr::group_by(gene, sample) %>%
+    dplyr::filter(dplyr::row_number() == 1) %>%
+    dplyr::mutate(sample_type = ifelse(str_detect(sample, "-T"), "Tumor", "Cell Type")) %>%
+    dplyr::group_by(gene) %>%
+    dplyr::mutate(sample_types = paste0(sample_type, collapse = "; ")) %>%
+    # dplyr::mutate(sample_types = strsplit(sample_types, split = "; ")) %>%
+    # dplyr::filter(grepl("Tumor", sample_types)) %>%
+    dplyr::select(-sample_types) %>%
+    dplyr::mutate(recurrence = dplyr::n()) %>%
+    dplyr::mutate(sample_number = str_extract(sample, "[0-9]+")) %>%
+    dplyr::filter(n_distinct(sample_number) > 1) %>%
+    dplyr::mutate(recurrence = paste0(author, ":", sample, collapse = "; ")) %>%
+    identity()
+
+  return(recurrent_vars)
+}
